@@ -1,0 +1,209 @@
+{% extends "mysite/base.html" %}
+
+{% load static bootstrap3 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+
+
+{% block jumbotron %}
+
+
+
+{{ response }}
+
+
+
+        <h1>Wskaźniki pieca</h1>
+        <div class="row">
+            <div class="col-sm-6" style="padding: 0px;">
+                <h1 class="temp inroom"><span id="inroom">??</span><span>°</span></h1>
+                <small id="currentSummary">W pomieszczeniu</small>
+            </div>            
+            <div class="col-sm-6" style="padding: 0px;">
+                <h1 class="temp"><span id="workpercent">??</span><span>%</span></h1>
+                <small id="currentSummary">Moc pieca</small>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12" style="padding: 0px;">
+                <h1 class="temp"><span id="usertemp">??</span><span>°</span></h1>
+                <small id="currentSummary">Temperatura docelowa</small>
+            </div>
+            <div class="col-lg-12">
+                <p>
+                    <a class="btn btn-info" id="about-btn" href="/admin/driver/setusertemp/">Ustaw temperature docelową</a>
+                </p>
+            </div>
+        </div>
+        {% endblock %}
+
+{% block content %}
+
+
+      <div class="row text-center">
+          <div class="btn-group" id="toggle_event_editing">
+	        <button type="button" class="btn off {% if furnace %}
+    {% for workstatus in furnace %}
+        {% if workstatus.work == False  %}
+             btn-info
+        {% else %}
+            btn-default
+        {% endif %}
+    {% endfor %}
+
+{% endif %}	">OFF</button>
+	        <button type="button" class="btn on {% if furnace %}
+    {% for workstatus in furnace %}
+        {% if workstatus.work == True %}
+             btn-info
+        {% else %}
+            btn-default
+        {% endif %}
+    {% endfor %}
+
+{% endif %}">ON</button>
+        </div>
+        <div class="alert alert-warning" id="switch_status">Switched off.</div>
+
+
+
+      </div>
+      <div class="row">
+            <div id="data">
+      </div>
+      </div>
+
+{% endblock %}
+{% block footer %}
+    <script>
+        $(function() {
+
+        $(document).ready( function() {
+        var refreshIntervalId;
+    {% for workstatus in furnace %}
+        {% if workstatus.work == True %}
+        clearInterval(refreshIntervalId);
+            start();
+        {% else %}
+        clearInterval(refreshIntervalId);
+            start();
+            $('#switch_status').html('Switched off.');
+        {% endif %}
+    {% endfor %}
+        
+            $('#toggle_event_editing button').click(function(){
+
+	            if($(this).hasClass('btn-info') && $(this).hasClass('on') || $(this).hasClass('btn-default') && $(this).hasClass('on')){
+                    $(this).removeClass('btn-default');
+	                $(this).addClass('btn-info');
+	                $('.off').removeClass('btn-info');
+	                $('.off').addClass('btn-default');
+		            /* code to do when unlocking */
+                    
+                    
+                   
+                   $.ajax({
+                        url:'{% url "driver:furnacework" %}',
+                        type: "GET",
+                        data: {
+                            status:true
+                            },
+                        success:function(response){console.log(data);},
+                        complete:function(data){
+                            $('#switch_status').html('Switched on.');
+                            //getTemp()
+                            clearInterval(refreshIntervalId);
+                            start();
+                        },
+                        error:function (xhr, textStatus, thrownError){
+                            console.log(xhr);
+                        }
+                    });
+	            } else if ($(this).hasClass('btn-info') && $(this).hasClass('off') || $(this).hasClass('btn-default') && $(this).hasClass('off')) {
+	                    $('.on').removeClass('btn-info');
+	                    $('.on').addClass('btn-default');
+	                    $(this).removeClass('btn-default');
+	                    $(this).addClass('btn-info');
+                       $.ajax({
+                        url:'{% url "driver:furnacework" %}',
+                        type: "GET",
+                        data: {
+                            status:false
+                            },
+                        success:function(response){console.log(data);},
+                        complete:function(data){
+                        clearInterval(refreshIntervalId);
+                        start();
+                            console.log(data)
+                            $('#switch_status').html('Switched off.');
+                            //clearInterval(refreshIntervalId);
+                        },
+                        error:function (xhr, textStatus, thrownError){
+                            console.log(xhr);
+                        }
+                    });
+                    $('#switch_status').html('Switched off.');
+                    
+	            }
+	
+            });
+
+
+            function getTemp(){
+                $.get('{% url "driver:sensors" %}', function(data){
+                       $('#data').html(data);
+                   });
+            }
+
+            function getinroom(){
+                $.get('{% url "driver:inroom" %}', function(data){
+                        console.log(Math.round(data * 100) / 100);
+                       $('#inroom').html(Math.round(data * 10) / 10);
+                   });
+            }
+            
+            
+            //function getonfurnace(){
+            //    $.get('{% url "driver:onfurnace" %}', function(data){
+             //          $('#onfurnace').html(data);
+             //      });
+           // }
+            
+            
+            function getusertemp(){
+                $.get('{% url "driver:usertemp" %}', function(data){
+                       $('#usertemp').html(data);
+                   });
+            }
+            
+            
+            //workpercent
+                        function getworkpercent(){
+                $.get('{% url "driver:workpercent" %}', function(data){
+                       $('#workpercent').html(data);
+                   });
+            }
+            function start(){
+                 refreshIntervalId = setInterval(function(){
+                    //getTemp();
+                    getinroom();
+                    //getonfurnace()
+                    getusertemp();
+                    getworkpercent();
+                }, 1000);
+            
+                $('#switch_status').html('Switched on.');
+             }
+            
+            
+                            //getTemp();
+                            //getinroom()
+                            //getonfurnace()
+                            //getusertemp()
+                            //getworkpercent()
+        });
+    });
+  </script>
+{% endblock %}
+

@@ -1,0 +1,93 @@
+{% extends "mysite/base.html" %}
+
+{% load static bootstrap3 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+
+
+{% block jumbotron %}
+
+
+        <h1>Dummy sensor</h1>
+        <div class="row">
+            <div class="col-sm-12" style="padding: 0px;">
+                <h1 class="temp inroom"><span id="inroom">43</span><span>°</span></h1>
+                <small id="currentSummary">W pomieszczeniu</small>
+            </div>            
+        </div>
+        {{ work }}
+{% endblock %}
+
+{% block content %}
+
+<div id="data">:)</div>
+
+{% endblock %}
+{% block footer %}
+    <script>
+        $(function() {
+
+        $(document).ready( function() {
+        var refreshIntervalId;
+    {% for workstatus in furnace %}
+        {% if workstatus.work == True %}
+        clearInterval(refreshIntervalId);
+            start();
+        {% else %}
+        clearInterval(refreshIntervalId);
+            start();
+        {% endif %}
+    {% endfor %}
+        
+
+
+            function getTemp(){
+                $.get('{% url "driver:sensors" %}', function(data){
+                       $('#data').html(data);
+                   });
+            }
+
+            function getinroom(){
+                $.get('{% url "driver:inroom" %}', function(data){
+                       $('#inroom').html(data);
+                   });
+            }
+            
+            
+            function getusertemp(){
+                $.get('{% url "driver:usertemp" %}', function(data){
+                       $('#usertemp').html(data);
+                   });
+            }
+            
+            
+            //workpercent
+            var time = 0;
+                        function getworkpercent(){
+                $.get('{% url "driver:workpercent" %}', function(data){
+                       //$('#workpercent').html(data);
+                       console.log(data);
+                       var time = data;
+                   });
+            }
+            function start(){
+                 refreshIntervalId = setInterval(function(){
+                    getTemp();
+                    getinroom();
+                }, 2000);
+            
+                $('#switch_status').html('Switched on.');
+             }
+            
+
+                            refreshwork = setInterval(function(){
+                
+                                getworkpercent();
+                            }, 1000);
+                            
+        });
+    });
+  </script>
+{% endblock %}
+
