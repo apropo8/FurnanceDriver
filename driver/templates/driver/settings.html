@@ -1,0 +1,29 @@
+{% extends "mysite/base.html" %}
+
+
+
+
+
+{% block jumbotron %}
+
+
+
+    <form action="{% url 'driver:savefurnacepower' %}" method="post">
+    {% csrf_token %}
+
+        <input type="text" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" />
+        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br />
+
+    <input type="submit" value="Vote" />
+    </form>
+{% endblock %}
+
+{% block content %}
+
+
+
+{% endblock %}
+{% block footer %}
+    
+{% endblock %}
+
