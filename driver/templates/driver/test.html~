@@ -1,0 +1,17 @@
+{% extends "mysite/base.html" %}
+{% load static bootstrap3 chartit %}
+{% bootstrap_css %}
+
+{% block jumbotron %}
+
+{% endblock %}
+
+{% block content %}
+
+{{ weatherchart | load_charts:"container" }}
+
+
+
+    <div id='container'> Chart will be rendered here </div>
+
+{% endblock %}
