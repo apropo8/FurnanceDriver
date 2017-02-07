@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_protect
-from .models import Logwork, Furnace, Furnacework, Setusertemp
+from .models import Logwork, Furnace, Furnacework, Setusertemp, Settings
 from chartit import DataPool, Chart
 from django.shortcuts import render_to_response
 
@@ -36,10 +36,16 @@ def savetemperature(request):
     
     furnaceworktemp = Furnacework.objects.order_by('-pub_date')[:1]
     workvaluepercent = workpercent(request).content
+
+    power = Settings.objects.order_by('-pub_date')[:1]
     
-    up = 1.27 * float(workvaluepercent)/100
-    down = float(1)
+    print power[0].savefurnacepower
+    print power[0].saveweatherpower
+    
+    up = float(power[0].savefurnacepower) * float(workvaluepercent)/100
+    down = float(power[0].saveweatherpower)
     temperatura = up - down
+    print temperatura
     lastnow = float(furnaceworktemp[0].temp) + temperatura
     if float(furnaceworktemps[0].temp) >= -20:
         q = Furnacework(temp=lastnow, pub_date=timezone.now(), tempstatus="-")
@@ -54,19 +60,43 @@ def savetemperature(request):
 #   down
 #
 
-def savefurnacepower(request):
-    furnace = Furnace.objects.values('work').order_by('-pub_date')[:1]
-    context = { 'furnace': furnace}
-    return render(request, 'driver/index.html', context )
+def savesettings(request):
+    #JSONdata = request.GET['status']
+    
+    
+    savefurnacepower = request.GET['savefurnacepower']
+    saveweatherpower = request.GET['saveweatherpower']
+    data = {savefurnacepower, saveweatherpower}
+    s = Settings(saveweatherpower=saveweatherpower , savefurnacepower=savefurnacepower, pub_date=timezone.now())
+    s.save()
+    #dictt = simplejson.JSONDecoder().decode( JSONdata )
+    #f = Furnace(work=dictt, pub_date=timezone.now())
+    #f.save()
+    #print JSONdata
+    #if JSONdata == True:
+       # f = Furnace(work=dictt, pub_date=timezone.now())
+       # f.save()
+        #return HttpResponse(JSONdata)
+    #else:
+        #f = Furnace(work=dictt, pub_date=timezone.now())
+        #f.save()
+    return HttpResponse(data)
 
 def saveweatherpower(request):
-    furnace = Furnace.objects.values('work').order_by('-pub_date')[:1]
-    context = { 'furnace': furnace}
-    return render(request, 'driver/index.html', context ) 
+    JSONdata = request.GET['status']
+    dictt = simplejson.JSONDecoder().decode( JSONdata )
+    if dictt == True:
+        f = Furnace(work=dictt, pub_date=timezone.now())
+        f.save()
+        return HttpResponse(dictt)
+    else:
+        f = Furnace(work=dictt, pub_date=timezone.now())
+        f.save()
+        return HttpResponse(dictt)
 
 def settings(request):
-    furnace = Furnace.objects.values('work').order_by('-pub_date')[:1]
-    context = { 'furnace': furnace}
+    settings = Settings.objects.order_by('-pub_date')[:1]
+    context = { 'settings': settings}
     return render(request, 'driver/settings.html', context )
 
 
@@ -138,6 +168,36 @@ def workpercent(request):
             work = 65
         else:
             work = 0
+    
+        #if val* 100 <= 98:
+        #    work = 100
+        #elif (val*100 >= 98) and (val*100 <= 102) :
+        #    work = 65
+        #else:
+        #    work = 0
+
+        if (float(inroo) / float(usertem))* 100 <= 98 or furnaceisworking[0].work == False:
+            work = 100
+       
+        elif ((float(inroo) / float(usertem))*100 > 98 and (float(inroo) / float(usertem))*100 <= 102) :
+            work = 65
+        else:
+            work = 0
+
+
+        #if val* 100 <= 85:
+        #    work = 100
+        #elif (val*100 <= 94) and (val*100 > 85):
+        #    work = 90
+        #elif (val*100 <= 96) and (val*100 > 94) :
+        #    work = 88
+        #elif (val*100 <= 100) and (val*100 > 96):
+        #    work = 82
+        #elif (val*100 > 100) and (val*100 <= 102) :
+        #    work = 65
+        #else:
+        #    work = 0
+            
     else:
         work = 0
         

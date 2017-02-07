@@ -5,25 +5,54 @@
 
 
 {% block jumbotron %}
+{% for set in settings %}
+    {{ set.savefurnacepower }}
+{% endfor %}
 
+<h1>Settings</h1>
+        <div class="row">
+        {% for set in settings %}
+    
 
+            <div class="col-sm-6">
+                <input type="number" step="0.01" name="savefurnacepower" id="savefurnacepower" value="{{ set.savefurnacepower }}" />
+                <label for="savefurnacepower">savefurnacepower</label><br />
+            </div>
+            <div class="col-sm-6">
+                <input type="number" step="0.01" name="saveweatherpower" id="saveweatherpower" value="{{ set.saveweatherpower }}" />
+                <label for="saveweatherpower">saveweatherpower</label><br />
+            </div>
+    {% endfor %}
+            <div class="col-sm-12">
+                <button id="saveform" class="btn btn-primary">Save</button>
+            </div>
+        </div>
 
-    <form action="{% url 'driver:savefurnacepower' %}" method="post">
-    {% csrf_token %}
-
-        <input type="text" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" />
-        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br />
-
-    <input type="submit" value="Vote" />
-    </form>
 {% endblock %}
 
 {% block content %}
 
-
-
 {% endblock %}
 {% block footer %}
-    
+    <script>
+    $('#saveform').click(function(){
+       $.ajax({
+        url:'{% url "driver:savesettings" %}',
+        type: "GET",
+        data: {
+            savefurnacepower:$('#savefurnacepower').val(),
+            saveweatherpower:$('#saveweatherpower').val()
+            },
+        success:function(response){console.log(data);},
+        complete:function(data){
+         console.log("sent");
+         console.log(data);
+        },
+        error:function (xhr, textStatus, thrownError){
+            console.log(xhr);
+        }
+    });
+    });
+    </script>
 {% endblock %}
 

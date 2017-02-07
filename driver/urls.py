@@ -28,9 +28,7 @@ urlpatterns = [
     
     url(r'statistic/$' , views.weather_chart_view, name='statistic'),
     
-    url(r'savefurnacepower/$' , views.savefurnacepower, name='savefurnacepower'),
-    
-    url(r'saveweatherpower/$' , views.saveweatherpower, name='saveweatherpower'),
+    url(r'savesettings/$' , views.savesettings, name='savesettings'),
     
     
     url(r'settings/$' , views.settings, name='settings'),

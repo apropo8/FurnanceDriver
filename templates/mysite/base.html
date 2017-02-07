@@ -28,7 +28,8 @@
       <ul class="nav navbar-nav">
         <li class="{% if request.resolver_match.app_name == 'driver' %} {% if request.resolver_match.url_name == 'index' %}active{% endif %}{% endif %}"><a href="{% url 'driver:index' %}"">Home</a></li>
         <li class="{% if request.resolver_match.app_name == 'driver' %} {% if request.resolver_match.url_name == 'statistic' %}active{% endif %}{% endif %}"><a href="{% url 'driver:statistic' %}"">Statistic</a></li>
-        
+        <li class="{% if request.resolver_match.app_name == 'driver' %} {% if request.resolver_match.url_name == 'settings' %}active{% endif %}{% endif %}"><a href="{% url 'driver:settings' %}"">Settings</a></li>
+    
         <li  class="{% if request.resolver_match.app_name == 'testdriver' %} {% if request.resolver_match.url_name == 'index' %}active{% endif %}{% endif %}"><a href="{% url 'testdriver:index' %}">Test</a></li>
       </ul>
     </div><!--/.nav-collapse -->
