@@ -40,7 +40,7 @@ class Furnace(models.Model):
     
 class Furnacework(models.Model):
 
-    temp = models.CharField(max_length = 200)
+    temp = models.FloatField(max_length = 200)
     pub_date = models.DateTimeField('date published')
     tempstatus = models.CharField(max_length = 200)
 
