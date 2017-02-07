@@ -25,4 +25,8 @@ urlpatterns = [
     
     #workpercent
     url(r'^workpercent/$', views.workpercent, name='workpercent'),
+    
+    url(r'statistic/$' , views.weather_chart_view, name='statistic'),
+    
+    
 ]

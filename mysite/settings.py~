@@ -25,7 +25,7 @@ SECRET_KEY = 'xsh4s936ue)o_mpa_y^wzml+ulv4bftu$*!g8$gk&9vfelgtom'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', '192.168.0.11']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', '192.168.0.11', '31.25.250.69']
 
 
 # Application definition
@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'bootstrap3',
+    'chartit',
+    'menuactive',
 ]
 
 MIDDLEWARE = [

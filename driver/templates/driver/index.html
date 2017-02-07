@@ -1,18 +1,10 @@
 {% extends "mysite/base.html" %}
 
-{% load static bootstrap3 %}
-{% bootstrap_css %}
-{% bootstrap_javascript %}
+
 
 
 
 {% block jumbotron %}
-
-
-
-{{ response }}
-
-
 
         <h1>Wskaźniki pieca</h1>
         <div class="row">
@@ -36,7 +28,7 @@
                 </p>
             </div>
         </div>
-        {% endblock %}
+{% endblock %}
 
 {% block content %}
 
@@ -162,15 +154,7 @@
                        $('#inroom').html(Math.round(data * 10) / 10);
                    });
             }
-            
-            
-            //function getonfurnace(){
-            //    $.get('{% url "driver:onfurnace" %}', function(data){
-             //          $('#onfurnace').html(data);
-             //      });
-           // }
-            
-            
+
             function getusertemp(){
                 $.get('{% url "driver:usertemp" %}', function(data){
                        $('#usertemp').html(data);
@@ -178,30 +162,21 @@
             }
             
             
-            //workpercent
-                        function getworkpercent(){
+            function getworkpercent(){
                 $.get('{% url "driver:workpercent" %}', function(data){
                        $('#workpercent').html(data);
                    });
             }
             function start(){
                  refreshIntervalId = setInterval(function(){
-                    //getTemp();
                     getinroom();
-                    //getonfurnace()
                     getusertemp();
                     getworkpercent();
                 }, 1000);
             
                 $('#switch_status').html('Switched on.');
              }
-            
-            
-                            //getTemp();
-                            //getinroom()
-                            //getonfurnace()
-                            //getusertemp()
-                            //getworkpercent()
+
         });
     });
   </script>

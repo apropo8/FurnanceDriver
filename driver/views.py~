@@ -12,6 +12,9 @@ from django.views import generic
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_protect
 from .models import Logwork, Furnace, Furnacework, Setusertemp
+from chartit import DataPool, Chart
+from django.shortcuts import render_to_response
+
 
 
 def days_hours_minutes(td):
@@ -24,51 +27,79 @@ def savetemperature(request):
     inroo = inroom(request).content
     val = (float(inroo) / float(usertem))*100
     furnaceisworking = Furnace.objects.order_by('-pub_date')[:1]
-    print furnaceisworking[0].work
+    #print furnaceisworking[0].work
     furnaceworktemps = Furnacework.objects.order_by('-pub_date')[:1]
     furnacework = Furnacework.objects.all().order_by('-pub_date')
     
     furnaceworktemp = Furnacework.objects.order_by('-pub_date')[:1]
     workvaluepercent = workpercent(request).content
-    
     #print workvaluepercent
-    up = 1.23 * float(workvaluepercent)/100
-    down = float(1)
+    statusofwork =  Furnacework.objects.all().order_by('-pub_date')[:6]
+    if furnaceisworking[0].work == True:
+        if statusofwork[3].tempstatus == "down" :
+            print statusofwork[5].tempstatus + " :O" 
+            tempi = 100
+            downn = False
+        elif statusofwork[1].tempstatus == "down" :
+            print statusofwork[1].tempstatus + " :O" 
+            tempi = 125
+            downn = True
+        elif statusofwork[2].tempstatus == "down" :
+            print statusofwork[2].tempstatus + " :O" 
+            tempi = 125
+            downn = True
+       #elif statusofwork[3].tempstatus == "down" :
+       #     print statusofwork[3].tempstatus + " :O" 
+       #     tempi = 125
+       #     downn = True
+        #elif statusofwork[4].tempstatus == "down" :
+       #     print statusofwork[4].tempstatus + " :O" 
+        #    tempi = 125
+        #    downn = True
+        elif statusofwork[0].tempstatus == "down":
+            downn = False
+            
+            tempi = 100
+            print statusofwork[4].tempstatus + " 5 is up"
+            
+            
+        #if (int(workvaluepercent) <= int(80)):
+            #tempi = 3
+       # elif (int(workvaluepercent) <= int(96)) and (int(workvaluepercent) > int(80)):
+            #tempi = 1.025
+       # elif (int(workvaluepercent) <= int(98)) and (int(workvaluepercent) > int(96)):
+           # tempi = 1.02
+
+       # elif (int(workvaluepercent) > int(98)) and (int(workvaluepercent) <= int(102)) :
+            #tempi = 1.025
+       # else:
+        #    tempi = 1
+    else:
+        tempi = 100
+
+ 
+    
+    print downn
+    #print workvaluepercent
+    up = 0.27 * float(workvaluepercent)/100
+    down = float(0.2)*float(tempi)/100
+    print "down " + str(up)
     temperatura = up - down
+    print temperatura
     lastnow = float(furnaceworktemp[0].temp) + temperatura
-    print up
+    if temperatura <= 0 or downn == False:
+        status = "down"
+    else:
+        status = "up"
+    #print status
     if float(furnaceworktemps[0].temp) >= 0:
-        q = Furnacework(temp=lastnow, pub_date=timezone.now(), tempstatus="up")
+        q = Furnacework(temp=lastnow, pub_date=timezone.now(), tempstatus=status)
         q.save()
     else:
         q = Furnacework(temp=0, pub_date=timezone.now(), tempstatus="up")
         q.save()
     
     
-    
-    #if float(furnaceworktemps[0].temp) >= 0:
-    #    if ((float(inroo) / float(usertem))* 100 >= 100 and  (float(inroo) / float(usertem))* 100 >= 100 ) or furnaceisworking[0].work == False: #and (float(inroo) / float(usertem))* 100 <= 101:
-#
-#            furnaceworktemp = Furnacework.objects.order_by('-pub_date')[:1]
-#
-#            tempdown = float(furnaceworktemp[0].temp) - 0.1# - (float(days_hours_minutes(delta2))+0.1)
-#           
-#            print "down"
-#            q = Furnacework(temp=tempdown, pub_date=timezone.now(), tempstatus="down")
-#            q.save()
-#        elif ((float(inroo) / float(usertem))* 100 <= 100 ) or furnaceisworking[0].work == True:
-#            
-#            furnaceworktemp = Furnacework.objects.order_by('-pub_date')[:2]
-#           
-#            tempup = float(furnaceworktemp[0].temp) + 0.1# + (float(days_hours_minutes(delta2))+0.1)
-#         
-#            print "up"
-#            q = Furnacework(temp=tempup, pub_date=timezone.now(), tempstatus="up")
-#            q.save()
-#    else:
-#        q = Furnacework(temp=0, pub_date=timezone.now(), tempstatus="up")
-#        q.save()
-        
 
 
 
@@ -105,13 +136,13 @@ def blip(request):
     
 def sensors(request):
     savetemperature(request)
-    #import subprocess
+    import subprocess
 
-    #proc = subprocess.Popen('sensors', stdout=subprocess.PIPE)
-    #tmp = proc.stdout.read()
+    proc = subprocess.Popen('sensors', stdout=subprocess.PIPE)
+    tmp = proc.stdout.read()
     #p = Logwork(data=tmp, pub_date=timezone.now())
     #p.save()
-    tmp = ""
+    #tmp = ""
     return HttpResponse(tmp)
     
 def inroom(request):
@@ -140,13 +171,16 @@ def workpercent(request):
     if furnaceisworking[0].work == True:
         if (float(inroo) / float(usertem))* 100 <= 85 or furnaceisworking[0].work == False:
             temp = 100
-        elif ((float(inroo) / float(usertem))*100 <= 96) and ((float(inroo) / float(usertem))*100 > 85):
-            temp = 100
-        elif ((float(inroo) / float(usertem))*100 <= 98) and ((float(inroo) / float(usertem))*100 > 96):
+        elif ((float(inroo) / float(usertem))*100 <= 94) and ((float(inroo) / float(usertem))*100 > 85):
             temp = 90
-
-        elif ((float(inroo) / float(usertem))*100 > 98 and (float(inroo) / float(usertem))*100 <= 102) :
-            temp = 85
+        elif ((float(inroo) / float(usertem))*100 <= 96 and (float(inroo) / float(usertem))*100 > 94) :
+            temp = 88
+        elif ((float(inroo) / float(usertem))*100 <= 98) and ((float(inroo) / float(usertem))*100 > 96):
+            temp = 82
+        elif ((float(inroo) / float(usertem))*100 <= 100) and ((float(inroo) / float(usertem))*100 > 98):
+            temp = 75
+        elif ((float(inroo) / float(usertem))*100 > 100 and (float(inroo) / float(usertem))*100 <= 102) :
+            temp = 65
         else:
             temp = 0
     else:
@@ -155,3 +189,40 @@ def workpercent(request):
     return HttpResponse(temp)
 
 
+
+
+def weather_chart_view(request):
+    #Step 1: Create a DataPool with the data we want to retrieve.
+    weatherdata = \
+        DataPool(
+           series=
+            [{'options': {
+               'source': Furnacework.objects.all().order_by('-pub_date')[:100]},
+              'terms': [ 'pub_date',
+                  'temp']}
+             ])
+
+    #Step 2: Create the Chart object
+    cht = Chart(
+            datasource = weatherdata,
+            series_options =
+              [{'options':{
+                  'type': 'line',
+                  'stacking': False},
+                'terms':{
+                  'pub_date': [
+                    'temp']
+                  }}],
+            chart_options =
+              {'title': {
+                   'text': 'Weather Data of Boston and Houston'},
+               'xAxis': {
+                    'title': {
+                       'text': 'Month number'}}})
+
+    #Step 3: Send the chart object to the template.
+   # return render_to_response({'weatherchart': cht})
+    context = { 'weatherchart': cht}
+    return render(request, 'driver/test.html', context )
+    
+    #return render_to_response('driver/test.html', {'weatherchart': cht})
