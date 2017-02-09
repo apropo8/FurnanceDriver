@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Logwork, Furnace, Furnacework, Setusertemp
+from .models import Logwork, Furnace, Furnacework, Setusertemp, Settings
 
 class FurnaceAdmin(admin.ModelAdmin):
     fieldsets = [
@@ -32,5 +32,6 @@ class SetusertempAdmin(admin.ModelAdmin):
     list_filter = ['pub_date']
     search_fields = ['usertemp']
     
-admin.site.register(Furnace, FurnaceAdmin)
+admin.site.register(Furnace, FurnaceAdmin, Settings)
 admin.site.register(Furnacework, FurnaceworkAdmin)
+admin.site.register(Setusertemp, SetusertempAdmin)

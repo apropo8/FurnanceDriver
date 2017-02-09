@@ -5,29 +5,90 @@
 
 
 {% block jumbotron %}
-{% for set in settings %}
-    {{ set.savefurnacepower }}
-{% endfor %}
+<style>
+.slide{
+    padding: 25px;
+}
 
+.slider:before {
+    position: initial;
+}
+ul {
+    list-style: none;
+    margin: 24px 0 0 0;
+    padding: 0;
+}
+</style>
 <h1>Settings</h1>
         <div class="row">
-        {% for set in settings %}
-    
-
-            <div class="col-sm-6">
-                <input type="number" step="0.01" name="savefurnacepower" id="savefurnacepower" value="{{ set.savefurnacepower }}" />
-                <label for="savefurnacepower">savefurnacepower</label><br />
-            </div>
-            <div class="col-sm-6">
-                <input type="number" step="0.01" name="saveweatherpower" id="saveweatherpower" value="{{ set.saveweatherpower }}" />
-                <label for="saveweatherpower">saveweatherpower</label><br />
-            </div>
-    {% endfor %}
             <div class="col-sm-12">
-                <button id="saveform" class="btn btn-primary">Save</button>
+                {% for set in usertemp %}
+                <div class="row">
+                    <div class="col-sm-12">    
+                        <input type="number" class="form-control" placeholder="Text input" step="0.01" name="usertemp" id="usertemp" value="{{ set.usertemp }}" >
+                        <label for="savefurnacepower">Temperatura docelowa</label><br />
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="col-sm-12">
+                    <button id="saveusertemp" class="btn btn-primary">Save</button>
+                </div>
             </div>
         </div>
+        <hr>
+        <div class="row">
+            <div class="col-sm-12">
+                {% for set in settings %}
+                <div class="row">
+                    <div class="col-sm-6">    
+                        <input type="number" class="form-control" placeholder="Text input" step="0.01" name="savefurnacepower" id="savefurnacepower" value="{{ set.savefurnacepower }}" >
+                        <label for="savefurnacepower">Wydajność pieca</label><br />
+                    </div>
+                    <div class="col-sm-6">
+                        <input type="number" class="form-control" placeholder="Text input" step="0.01" name="saveweatherpower" id="saveweatherpower" value="{{ set.saveweatherpower }}" >
+                        <label for="saveweatherpower">Wydajność pogody</label><br />
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="col-sm-12">
+                    <button id="savepower" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+<hr>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="row slide ">
+                    Moc pieca pomiedzy 65% a 75% docelowej temperatury 
+                    <div class="first col-sm-12"></div>
+                    <div id="first">?</div>
+                </div>
+               <div class="row slide ">
+                   Moc pieca pomiedzy 75% a 85% docelowej temperatury 
+                    <div class="second col-sm-12"></div>
+                    <div id="second">?</div>
+                </div>
+                <div class="row slide ">
+                    Moc pieca pomiedzy 85% a 95% docelowej temperatury 
+                    <div class="third col-sm-12"></div>
+                    <div id="third">?</div>
+                </div>
+                <div class="row slide ">
+                    Moc pieca pomiedzy 95% a 98% docelowej temperatury 
+                    <div class="fourth col-sm-12"> </div>
+                    <div id="fourth">?</div>
+                </div>
+                <div class="row slide ">
+                    Moc pieca pomiedzy 98% a 102% docelowej temperatury 
+                    <div class="fifth col-sm-12"></div>
+                    <div id="fifth">?</div>
+                </div>
+                <div class="col-sm-12">
+                    <button id="savepowersettings" class="btn btn-primary">Save</button>
+                </div>
 
+            </div>
+        </div>
 {% endblock %}
 
 {% block content %}
@@ -35,7 +96,115 @@
 {% endblock %}
 {% block footer %}
     <script>
-    $('#saveform').click(function(){
+        function hexFromRGB(r, g, b) {
+      var hex = [
+        r.toString( 16 ),
+        g.toString( 16 ),
+        b.toString( 16 )
+      ];
+      $.each( hex, function( nr, val ) {
+        if ( val.length === 1 ) {
+          hex[ nr ] = "0" + val;
+        }
+      });
+      return hex.join( "" ).toUpperCase();
+    }
+    function refreshSwatch() {
+      var first = $( ".first" ).slider( "value" ),
+        second = $( ".second" ).slider( "value" ),
+        third = $( ".third" ).slider( "value" ),
+        fourth = $( ".fourth" ).slider( "value" ),
+        fifth = $( ".fifth" ).slider( "value" );
+        $('#first').text(first);
+        $('#second').text(second);
+        $('#third').text(third);
+        $('#fourth').text(fourth);
+        $('#fifth').text(fifth);
+      //$( "#swatch" ).css( "background-color", "#" + hex );
+    }
+    {% for pset in powersettings %}
+        $('#first').text({{ pset.first }});
+        $('#second').text({{ pset.second }});
+        $('#third').text({{ pset.third }});
+        $('#fourth').text({{ pset.fourth }});
+        $('#fifth').text({{ pset.fifth }});
+        $( ".fifth" ).slider({
+          orientation: "horizontal",
+          range: "min",
+          max: 100,
+          value: {{ pset.fifth }},
+          slide: refreshSwatch,
+          change: refreshSwatch
+        });
+        $( ".fourth" ).slider({
+          orientation: "horizontal",
+          range: "min",
+          max: 100,
+          value: {{ pset.fourth }},
+          slide: refreshSwatch,
+          change: refreshSwatch
+        });
+        $( ".third" ).slider({
+          orientation: "horizontal",
+          range: "min",
+          max: 100,
+          value: {{ pset.third }},
+          slide: refreshSwatch,
+          change: refreshSwatch
+        });
+        $( ".second" ).slider({
+          orientation: "horizontal",
+          range: "min",
+          max: 100,
+          value: {{ pset.second }},
+          slide: refreshSwatch,
+          change: refreshSwatch
+        });
+        $( ".first" ).slider({
+          orientation: "horizontal",
+          range: "min",
+          max: 100,
+          value: {{ pset.first }},
+          slide: refreshSwatch,
+          change: refreshSwatch
+        });
+    {% endfor %}
+    
+        $( "#red" ).slider( "value", 255 );
+        $( "#green" ).slider( "value", 140 );
+        $( "#blue" ).slider( "value", 60 );
+    
+
+
+
+    $('#savepowersettings').click(function(){
+       $.ajax({
+        url:'{% url "driver:savepowersettings" %}',
+        type: "GET",
+        data: {
+            first: $('#first').text(),
+            second: $('#second').text(),
+            third: $('#third').text(),
+            fourth: $('#fourth').text(),
+            fifth: $('#fifth').text(),
+            },
+        success:function(response){console.log(response);},
+        complete:function(data){
+         console.log("sent");
+         console.log(data);
+        },
+        error:function (xhr, textStatus, thrownError){
+            console.log(xhr);
+        }
+    });
+    });
+
+
+
+
+
+
+    $('#savepower').click(function(){
        $.ajax({
         url:'{% url "driver:savesettings" %}',
         type: "GET",
@@ -43,7 +212,25 @@
             savefurnacepower:$('#savefurnacepower').val(),
             saveweatherpower:$('#saveweatherpower').val()
             },
-        success:function(response){console.log(data);},
+        success:function(response){console.log(response);},
+        complete:function(data){
+         console.log("sent");
+         console.log(data);
+        },
+        error:function (xhr, textStatus, thrownError){
+            console.log(xhr);
+        }
+    });
+    });
+    
+    $('#saveusertemp').click(function(){
+       $.ajax({
+        url:'{% url "driver:saveusertemp" %}',
+        type: "GET",
+        data: {
+            usertemp:$('#usertemp').val(),
+            },
+        success:function(response){console.log(response);},
         complete:function(data){
          console.log("sent");
          console.log(data);

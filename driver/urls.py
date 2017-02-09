@@ -30,6 +30,11 @@ urlpatterns = [
     
     url(r'savesettings/$' , views.savesettings, name='savesettings'),
     
+    url(r'saveusertemp/$' , views.saveusertemp, name='saveusertemp'),
+    
+    url(r'savepowersettings/$' , views.savepowersettings, name='savepowersettings'),
+    
+    
     
     url(r'settings/$' , views.settings, name='settings'),
     

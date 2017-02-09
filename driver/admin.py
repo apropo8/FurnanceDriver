@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Logwork, Furnace, Furnacework, Setusertemp
+from .models import Logwork, Furnace, Furnacework, Setusertemp, Settings
 
 class FurnaceAdmin(admin.ModelAdmin):
     fieldsets = [
@@ -35,3 +35,4 @@ class SetusertempAdmin(admin.ModelAdmin):
 admin.site.register(Furnace, FurnaceAdmin)
 admin.site.register(Furnacework, FurnaceworkAdmin)
 admin.site.register(Setusertemp, SetusertempAdmin)
+admin.site.register(Settings)

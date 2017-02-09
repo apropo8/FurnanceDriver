@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_protect
-from .models import Logwork, Furnace, Furnacework, Setusertemp, Settings
+from .models import Logwork, Furnace, Furnacework, Setusertemp, Settings, Powersettings
 from chartit import DataPool, Chart
 from django.shortcuts import render_to_response
 
@@ -39,13 +39,13 @@ def savetemperature(request):
 
     power = Settings.objects.order_by('-pub_date')[:1]
     
-    print power[0].savefurnacepower
-    print power[0].saveweatherpower
+    #print power[0].savefurnacepower
+    #print power[0].saveweatherpower
     
     up = float(power[0].savefurnacepower) * float(workvaluepercent)/100
     down = float(power[0].saveweatherpower)
     temperatura = up - down
-    print temperatura
+    #print temperatura
     lastnow = float(furnaceworktemp[0].temp) + temperatura
     if float(furnaceworktemps[0].temp) >= -20:
         q = Furnacework(temp=lastnow, pub_date=timezone.now(), tempstatus="-")
@@ -61,42 +61,39 @@ def savetemperature(request):
 #
 
 def savesettings(request):
-    #JSONdata = request.GET['status']
-    
-    
     savefurnacepower = request.GET['savefurnacepower']
     saveweatherpower = request.GET['saveweatherpower']
     data = {savefurnacepower, saveweatherpower}
     s = Settings(saveweatherpower=saveweatherpower , savefurnacepower=savefurnacepower, pub_date=timezone.now())
     s.save()
-    #dictt = simplejson.JSONDecoder().decode( JSONdata )
-    #f = Furnace(work=dictt, pub_date=timezone.now())
-    #f.save()
-    #print JSONdata
-    #if JSONdata == True:
-       # f = Furnace(work=dictt, pub_date=timezone.now())
-       # f.save()
-        #return HttpResponse(JSONdata)
-    #else:
-        #f = Furnace(work=dictt, pub_date=timezone.now())
-        #f.save()
     return HttpResponse(data)
 
-def saveweatherpower(request):
-    JSONdata = request.GET['status']
-    dictt = simplejson.JSONDecoder().decode( JSONdata )
-    if dictt == True:
-        f = Furnace(work=dictt, pub_date=timezone.now())
-        f.save()
-        return HttpResponse(dictt)
-    else:
-        f = Furnace(work=dictt, pub_date=timezone.now())
-        f.save()
-        return HttpResponse(dictt)
+def saveusertemp(request):
+    usertemp = request.GET['usertemp']
+    data = {usertemp}
+    print usertemp
+    s = Setusertemp(usertemp=usertemp , pub_date=timezone.now())
+    s.save()
+    return HttpResponse(data)
+
+def savepowersettings(request):
+
+    first = request.GET['first']
+    second = request.GET['second']
+    third = request.GET['third']
+    fourth = request.GET['fourth']
+    fifth = request.GET['fifth']
+    data = {first, second, third, fourth, fifth}
+    print usertemp
+    s = Powersettings(first=first, second=second, third=third, fourth=fourth, fifth=fifth , pub_date=timezone.now())
+    s.save()
+    return HttpResponse(data)
 
 def settings(request):
+    usertemp = Setusertemp.objects.order_by('-pub_date')[:1]
     settings = Settings.objects.order_by('-pub_date')[:1]
-    context = { 'settings': settings}
+    powersettings = Powersettings.objects.order_by('-pub_date')[:1]
+    context = { 'settings': settings, 'usertemp':usertemp, 'powersettings':powersettings }
     return render(request, 'driver/settings.html', context )
 
 
@@ -148,62 +145,35 @@ def usertemp(request):
     return HttpResponse(usertemp)
     
 def workpercent(request):
+    powersettings = Powersettings.objects.order_by('-pub_date')[:1]
     furnaceisworking = Furnace.objects.order_by('-pub_date')[:1]
     if float(usertemp(request).content) == 0:
         usertem = float(0.01)
     else:
         usertem = usertemp(request).content
     inroo = inroom(request).content
-    val = (float(inroo) / float(usertem))*100
     if furnaceisworking[0].work == True:
-        #if (float(inroo) / float(usertem))* 100 <= 85 or furnaceisworking[0].work == False:
-        #    work = 100
-        #elif ((float(inroo) / float(usertem))*100 <= 94) and ((float(inroo) / float(usertem))*100 > 85):
-        #    work = 90
-        #elif ((float(inroo) / float(usertem))*100 <= 96 and (float(inroo) / float(usertem))*100 > 94) :
-        #    work = 88
-        #elif ((float(inroo) / float(usertem))*100 <= 100) and ((float(inroo) / float(usertem))*100 > 96):
-        #    work = 82
-        #elif ((float(inroo) / float(usertem))*100 > 100 and (float(inroo) / float(usertem))*100 <= 102) :
-        #    work = 65
-        #else:
-        #    work = 0
-    
-        #if val* 100 <= 98:
-        #    work = 100
-        #elif (val*100 >= 98) and (val*100 <= 102) :
-        #    work = 65
-        #else:
-        #    work = 0
-
-        if (float(inroo) / float(usertem))* 100 <= 98 or furnaceisworking[0].work == False:
+        val = (float(inroo) / float(usertem))* 100
+        if val <= 65 or furnaceisworking[0].work == False:
             work = 100
-       
-        elif ((float(inroo) / float(usertem))*100 > 98 and (float(inroo) / float(usertem))*100 <= 102) :
-            work = 65
+        elif (val > 65 and val <= 75) :
+            work = powersettings[0].first
+        elif (val > 75 and val <= 85) :
+            work = powersettings[0].second
+        elif (val > 85 and val <= 95) :
+            work = powersettings[0].third
+        elif (val > 95 and val <= 98) :
+            work = powersettings[0].fourth
+        elif (val > 98 and val <= 102) :
+            work = powersettings[0].fifth
         else:
             work = 0
 
-
-        #if val* 100 <= 85:
-        #    work = 100
-        #elif (val*100 <= 94) and (val*100 > 85):
-        #    work = 90
-        #elif (val*100 <= 96) and (val*100 > 94) :
-        #    work = 88
-        #elif (val*100 <= 100) and (val*100 > 96):
-        #    work = 82
-        #elif (val*100 > 100) and (val*100 <= 102) :
-        #    work = 65
-        #else:
-        #    work = 0
             
     else:
         work = 0
         
     return HttpResponse(work)
-
-
 
 
 def weather_chart_view(request):
@@ -212,7 +182,7 @@ def weather_chart_view(request):
            series=
             [{'options': {
                'source': Furnacework.objects.all().order_by('-pub_date')[:100]},
-              'terms': [ 'pub_date',
+              'terms': [ ('pub_date'),
                   'temp']}
              ])
 
@@ -230,6 +200,10 @@ def weather_chart_view(request):
               {'title': {
                    'text': 'Temperature data in room'},
                'xAxis': {
+               'type': 'datetime',
+               'dateTimeLabelFormats': {
+                        'day': '%b %e'
+                    },
                     'title': {
                        'text': 'Date'}},
                'yAxis': {

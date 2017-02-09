@@ -162,7 +162,7 @@
             }
             
             
-                        function getworkpercent(){
+            function getworkpercent(){
                 $.get('{% url "driver:workpercent" %}', function(data){
                        $('#workpercent').html(data);
                    });
