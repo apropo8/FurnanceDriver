@@ -11,12 +11,17 @@ from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_protect
-from .models import Logwork, Furnace, Furnacework, Setusertemp, Settings, Powersettings
+from .models import Logwork, Furnace, Furnacework, Setusertemp, Settings, Powersettings, Dayandnight
 from chartit import DataPool, Chart
 from django.shortcuts import render_to_response
 
 
-
+def f(x):
+    return {
+        'a': 1,
+        'b': 2,
+    }[x]
+    
 def days_hours_minutes(td):
     val = td.seconds//3600 *60 + (td.seconds*10//60)%60
     return val
@@ -47,6 +52,8 @@ def savetemperature(request):
     temperatura = up - down
     #print temperatura
     lastnow = float(furnaceworktemp[0].temp) + temperatura
+    
+    
     if float(furnaceworktemps[0].temp) >= -20:
         q = Furnacework(temp=lastnow, pub_date=timezone.now(), tempstatus="-")
         q.save()
@@ -70,9 +77,10 @@ def savesettings(request):
 
 def saveusertemp(request):
     usertemp = request.GET['usertemp']
-    data = {usertemp}
-    print usertemp
-    s = Setusertemp(usertemp=usertemp , pub_date=timezone.now())
+    usertempnight = request.GET['usertempnight']
+    data = {usertemp, usertempnight}
+    #print usertemp
+    s = Setusertemp(usertemp=usertemp, usertempnight=usertempnight, pub_date=timezone.now())
     s.save()
     return HttpResponse(data)
 
@@ -84,7 +92,7 @@ def savepowersettings(request):
     fourth = request.GET['fourth']
     fifth = request.GET['fifth']
     data = {first, second, third, fourth, fifth}
-    print usertemp
+    #print usertemp
     s = Powersettings(first=first, second=second, third=third, fourth=fourth, fifth=fifth , pub_date=timezone.now())
     s.save()
     return HttpResponse(data)
@@ -103,6 +111,23 @@ def index(request):
     return render(request, 'driver/index.html', context )
 
 
+def getdaynight(request):
+
+    tmp = Dayandnight.objects.order_by('-pub_date')[:1]
+    return HttpResponse(tmp[0].timeofday)
+        
+        
+def dayornight(request):
+    JSONdata = request.GET['status']
+    dictt = simplejson.JSONDecoder().decode( JSONdata )
+    if dictt == True:
+        f = Dayandnight(timeofday="day", count="1", pub_date=timezone.now())
+        f.save()
+        return HttpResponse(dictt)
+    else:
+        f = Dayandnight(timeofday="night", count="1", pub_date=timezone.now())
+        f.save()
+        return HttpResponse(dictt)
 
 def furnacework(request):
     JSONdata = request.GET['status']
@@ -142,11 +167,18 @@ def onfurnace(request):
     
 def usertemp(request):
     usertemp = Setusertemp.objects.order_by('-pub_date')[:1]
-    return HttpResponse(usertemp)
+    #print usertemp[0].usertempnight
+    dayornight = Dayandnight.objects.order_by('-pub_date')[:1]
+    if dayornight[0].timeofday == "day":
+        usertempdon = usertemp[0].usertemp
+    else:
+        usertempdon = usertemp[0].usertempnight
+    return HttpResponse(usertempdon)
     
 def workpercent(request):
     powersettings = Powersettings.objects.order_by('-pub_date')[:1]
     furnaceisworking = Furnace.objects.order_by('-pub_date')[:1]
+    #print usertemp(request).content.usertempnight
     if float(usertemp(request).content) == 0:
         usertem = float(0.01)
     else:

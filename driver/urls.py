@@ -34,6 +34,9 @@ urlpatterns = [
     
     url(r'savepowersettings/$' , views.savepowersettings, name='savepowersettings'),
     
+    url(r'dayornight/$' , views.dayornight, name='dayornight'),
+    
+    url(r'getdaynight/$' , views.getdaynight, name='getdaynight'),
     
     
     url(r'settings/$' , views.settings, name='settings'),

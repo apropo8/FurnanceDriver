@@ -18,10 +18,33 @@
         </div>
         {{ work }}
 {% endblock %}
-<div id="data">:)</div>
+
 {% block content %}
 
 
+      <div class="row text-center">
+          <div class="btn-group" id="toggle_event_editing">
+	        <button id="night" type="button" class="btn off {% if furnace %}
+    {% for workstatus in dayandnight %}
+        {% if workstatus.timeofday == False  %}
+             btn-info
+        {% else %}
+            btn-default
+        {% endif %}
+    {% endfor %}
+
+{% endif %}	">Night</button>
+	        <button id="day" type="button" class="btn on ">Day</button>
+        </div>
+        <div class="alert alert-warning" id="switch_status">Switched off.</div>
+
+
+
+      </div>
+      <div class="row">
+            <div id="data">
+      </div>
+      </div>
 
 {% endblock %}
 {% block footer %}
@@ -30,6 +53,33 @@
 
         $(document).ready( function() {
         var refreshIntervalId;
+        
+{% if furnace %}
+    {% for workstatus in dayandnight %}
+        {% if workstatus.timeofday == True %}
+             btn-info
+        {% else %}
+            btn-default
+        {% endif %}
+    {% endfor %}
+
+{% endif %}
+                    getdaynight();
+            function getdaynight(){
+                $.get('{% url "driver:getdaynight" %}', function(data){
+                       //$('#data').html(data);
+                       if (data == "day"){
+                            $('#day').addClass('btn-info');
+                            $('#night').addClass('btn-default');
+                       }
+                       else {
+                            $('#day').addClass('btn-default');
+                            $('#night').addClass('btn-info');
+                       }
+                       console.log(data)
+                   });
+            }
+        
     {% for workstatus in furnace %}
         {% if workstatus.work == True %}
         clearInterval(refreshIntervalId);
@@ -40,7 +90,64 @@
         {% endif %}
     {% endfor %}
         
+            $('#toggle_event_editing button').click(function(){
 
+	            if($(this).hasClass('btn-info') && $(this).hasClass('on') || $(this).hasClass('btn-default') && $(this).hasClass('on')){
+                    $(this).removeClass('btn-default');
+	                $(this).addClass('btn-info');
+	                $('.off').removeClass('btn-info');
+	                $('.off').addClass('btn-default');
+		            /* code to do when unlocking */
+                    
+                    
+                   
+                   $.ajax({
+                        url:'{% url "driver:dayornight" %}',
+                        type: "GET",
+                        data: {
+                            status:true
+                            },
+                        success:function(response){console.log(data);},
+                        complete:function(data){
+                            $('#switch_status').html('Switched on.');
+                            //getTemp()
+
+                        },
+                        error:function (xhr, textStatus, thrownError){
+                            console.log(xhr);
+                        }
+                    });
+	            } else if ($(this).hasClass('btn-info') && $(this).hasClass('off') || $(this).hasClass('btn-default') && $(this).hasClass('off')) {
+	                    $('.on').removeClass('btn-info');
+	                    $('.on').addClass('btn-default');
+	                    $(this).removeClass('btn-default');
+	                    $(this).addClass('btn-info');
+                       $.ajax({
+                        url:'{% url "driver:dayornight" %}',
+                        type: "GET",
+                        data: {
+                            status:false
+                            },
+                        success:function(response){console.log(data);},
+                        complete:function(data){
+               
+                            console.log(data)
+                            $('#switch_status').html('Switched off.');
+                            //clearInterval(refreshIntervalId);
+                        },
+                        error:function (xhr, textStatus, thrownError){
+                            console.log(xhr);
+                        }
+                    });
+                    $('#switch_status').html('Switched off.');
+                    
+	            }
+	
+            });
+
+
+            
+            
 
             function getTemp(){
                 $.get('{% url "driver:sensors" %}', function(data){

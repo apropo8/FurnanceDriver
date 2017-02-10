@@ -24,9 +24,13 @@ ul {
             <div class="col-sm-12">
                 {% for set in usertemp %}
                 <div class="row">
-                    <div class="col-sm-12">    
+                    <div class="col-sm-6">    
                         <input type="number" class="form-control" placeholder="Text input" step="0.01" name="usertemp" id="usertemp" value="{{ set.usertemp }}" >
-                        <label for="savefurnacepower">Temperatura docelowa</label><br />
+                        <label for="usertemp">Temperatura docelowa w dzień</label><br />
+                    </div>
+                    <div class="col-sm-6">    
+                        <input type="number" class="form-control" placeholder="Text input" step="0.01" name="usertempnight" id="usertempnight" value="{{ set.usertempnight }}" >
+                        <label for="usertempnight">Temperatura docelowa w nocy</label><br />
                     </div>
                 </div>
                 {% endfor %}
@@ -229,6 +233,7 @@ ul {
         type: "GET",
         data: {
             usertemp:$('#usertemp').val(),
+            usertempnight:$('#usertempnight').val(),
             },
         success:function(response){console.log(response);},
         complete:function(data){

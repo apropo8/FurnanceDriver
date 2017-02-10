@@ -1,6 +1,9 @@
 from django.shortcuts import render
+#from .models import  Dayandnight
 
 def index(request):
     #furnace = Furnace.objects.values('work').order_by('-pub_date')[:1]
-    context = { 'furnace': "dd"}
-    return render(request, 'driver/index.html', context )
+    #dayandnight  = Dayandnight.objects.values('timeofday').order_by('-pub_date')[:1] #(timeofday="night", count="1", pub_date=timezone.now())
+    
+    context = { 'dayandnight': 'dayandnight'}
+    return render(request, 'testdriver/index.html', context )

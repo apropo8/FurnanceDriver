@@ -57,6 +57,7 @@ class Furnacework(models.Model):
 class Setusertemp(models.Model):
 
     usertemp = models.CharField(max_length = 200)
+    usertempnight = models.CharField(max_length = 200)
     pub_date = models.DateTimeField('date published')
     
 
@@ -106,7 +107,22 @@ class Powersettings(models.Model):
     was_published_recently.boolean = True
     was_published_recently.short_description = 'Published recently?'
     
+class Dayandnight(models.Model):
 
+    
+    timeofday = models.CharField(max_length = 200)
+    count = models.CharField(max_length = 200)
+    pub_date = models.DateTimeField('date published')
+    
+
+    def __unicode__(self):
+        return unicode(self.timeofday)    
+    def was_published_recently(self):
+        now = timezone.now()
+        return now - datetime.timedelta(days=1) <= self.pub_date <= now
+    was_published_recently.admin_order_field = 'pub_date'
+    was_published_recently.boolean = True
+    was_published_recently.short_description = 'Published recently?'
     
 #@python_2_unicode_compatible  # only if you need to support Python 2
 #class Choice(models.Model):

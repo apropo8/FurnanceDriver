@@ -24,9 +24,13 @@ ul {
             <div class="col-sm-12">
                 {% for set in usertemp %}
                 <div class="row">
-                    <div class="col-sm-12">    
+                    <div class="col-sm-6">    
                         <input type="number" class="form-control" placeholder="Text input" step="0.01" name="usertemp" id="usertemp" value="{{ set.usertemp }}" >
-                        <label for="savefurnacepower">Temperatura docelowa</label><br />
+                        <label for="savefurnacepower">Temperatura docelowa w dzień</label><br />
+                    </div>
+                    <div class="col-sm-6">    
+                        <input type="number" class="form-control" placeholder="Text input" step="0.01" name="usertemp" id="usertemp" value="{{ set.usertempnight }}" >
+                        <label for="savefurnacepower">Temperatura docelowa w nocy</label><br />
                     </div>
                 </div>
                 {% endfor %}
@@ -35,6 +39,7 @@ ul {
                 </div>
             </div>
         </div>
+        <hr>
         <div class="row">
             <div class="col-sm-12">
                 {% for set in settings %}
